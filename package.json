@@ -1,5 +1,5 @@
 {
-  "name": "STO Price Module",
+  "name": "sto-price-module",
   "version": "1.0.0",
   "description": "",
   "main": "pricemodule.js",
