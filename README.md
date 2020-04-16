@@ -17,7 +17,7 @@ pricefeedmode, priceAPIname and hosturl to create assoicate price feed object an
 |CCT|CryptoSX|Websocket|LastTradedPx|
 
 ### CryptoSX implementation
-The communiction between server and host is base on the following message format :
+The communiction between server and host is based on the following message format :
 ```javascript
 msgstruct={
  "m":0,
