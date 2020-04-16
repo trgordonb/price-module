@@ -1,26 +1,39 @@
-const tokeninfo = require('./model/tokens-info.model');
 const cryptosxws = require('./lib/cryptosxfeed');
 const logger = require('./lib/logger');
-const db = require('./lib/db');
+const request = require('axios');
+const PORT = process.env.PORT ||5000;
+const stoadminurl = process.env.STOADMINURL || `http://127.0.0.1:${PORT}`;
 
 
-var tokens=[];
 
+const getdata = async function(){
+	let tokensinforequest=null;
+	let tokens=null;
+	try{
+			tokensinforequest = request.post(`${stoadminurl}/tokensinfo/getTokensinfo`).then((response)=>{
+			tokens=response.data;
 
-tokeninfo.find({},null,function(err,docs){
-		if(err){
-			logger.error(`PriceModule get Tokens info error : ${err}`);
-			console.log(err);
-		}else{
-			tokens=JSON.parse(JSON.stringify(docs));
-			logger.info(`PriceModule tokens length: ${tokens.length}`);
+		});// request then end
+	}catch(error){
+		//getprice error
+		logger.error(`-- 1. PriceModule main getdata - tokens-info error : ${error}}`);
+	}	
+	await request.all([tokensinforequest]);
+	return [tokens];
 
+}
+
+//main start
+getdata().then((a)=>{
+			let tokens=a[0];
 			for(var i=0;i<tokens.length;i++){
 				logger.info(`PriceModule tokens ${tokens[i].SYMBOL}`);
 				let symbol = tokens[i].SYMBOL;
 				let url = tokens[i].pricehost;
 				if(tokens[i].pricefeedmode=="WS"){
+					// WebStocket implementation
 					if(tokens[i].priceAPIname=="cryptosx"){
+						// cryptosx implementation
 						logger.info(`PriceModule create webstocket with ${tokens[i].priceAPIname}`);
 						let msgstruct={
 							  "m":0,
@@ -34,15 +47,19 @@ tokeninfo.find({},null,function(err,docs){
 					"UserId": "3138",
 					"Nonce": "1300231004"
 						};
-						let obj = new cryptosxws(symbol,"cryptosx",msgstruct,url,securitypayload,true,tokens[i].basecurrency);
+						let obj = new cryptosxws(symbol,"cryptosx",msgstruct,url,securitypayload,true,tokens[i].basecurrency,stoadminurl);
 						logger.info(`PriceModule start webstocket with ${tokens[i].priceAPIname}`);
 						obj.start();
 
+					}else{
+						// others API spec
+						logger.info(`PriceModule the API spec is not implemented yet :  ${tokens[i].priceAPIname}`);
 					}	
+				}else{
+					// others pricefeed mode
+					logger.info(`PriceModule the pricefeedmode is not implemented yet :  ${tokens[i].pricefeedmode}`);
 				}
 	
-
 			}
-		}
-		
-		});
+
+});// main getdata then end
