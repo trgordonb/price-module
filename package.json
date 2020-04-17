@@ -11,6 +11,9 @@
     "type": "git",
     "url": ""
   },
+  "engines": {
+    "node": "12.16.2"
+  },
   "keywords": [],
   "author": "Ensemble Technologies",
   "license": "ISC",
